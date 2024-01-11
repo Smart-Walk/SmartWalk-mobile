@@ -24,11 +24,15 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromRGBO(28, 30, 45, 1),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromRGBO(17, 18, 28, 1),
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -38,6 +42,9 @@ class HomeScreen extends StatelessWidget {
               child: Text("Live tracking"),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromRGBO(17, 18, 28, 1),
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -52,3 +59,43 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+// class HomeScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Color.fromRGBO(28, 30, 45, 1),
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             ElevatedButton(
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: Color.fromRGBO(17, 18, 28, 1),
+//               ),
+//               onPressed: () {
+//                 Navigator.push(
+//                   context,
+//                   MaterialPageRoute(builder: (context) => LiveTrack()),
+//                 );
+//               },
+//               child: Text("Live tracking"),
+//             ),
+//             ElevatedButton(
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: Color.fromRGBO(17, 18, 28, 1),
+//               ),
+//               onPressed: () {
+//                 Navigator.push(
+//                   context,
+//                   MaterialPageRoute(builder: (context) => RecordLocation()),
+//                 );
+//               },
+//               child: Text("Record locations"),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
