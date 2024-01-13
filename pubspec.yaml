@@ -37,6 +37,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   gestures: ^1.0.0
   wifi_scan: ^0.4.0+2
+  http: ^1.1.0
+  path_provider: ^2.1.2
+  google_maps_flutter: ^2.5.3
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +66,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/hostel.png
+    - assets/images/hostel2.png
+    - assets/images/hostel3.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
