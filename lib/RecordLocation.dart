@@ -33,6 +33,34 @@ class _GameGridState extends State<GameGrid> {
   final double cellSize = 15.0;
   int selectedGrid = -1;
   List<WiFiAccessPoint> accessPoints = <WiFiAccessPoint>[];
+  String selectedSSID = "";
+  int selectedSignal = 0;
+  bool deleteMode = false;
+  List<int> selectedTiles = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+
+  Future<void> _updateTilesList() async {
+    if (deleteMode) {
+      final response = await http.post(
+        Uri.parse('http://192.168.1.46:8000/api/update_blocked'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({"tiles": selectedTiles}),
+      );
+
+      if (response.statusCode == 200) {
+        print("Server update successful");
+      } else {
+        print("Error updating server: ${response.statusCode}");
+      }
+    }
+  }
 
 
   void kShowSnackBar(BuildContext context, String message) {
