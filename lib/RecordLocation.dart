@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:wifi_scan/wifi_scan.dart';
 
 class RecordLocation extends StatelessWidget {
@@ -9,12 +13,12 @@ class RecordLocation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.black,
-        body: Padding(
-          padding: const EdgeInsets.only(top: 25),
-          child: GameGrid(),
-        ),
-      );
+      backgroundColor: Colors.black,
+      body: Padding(
+        padding: const EdgeInsets.only(top: 25),
+        child: GameGrid(),
+      ),
+    );
   }
 }
 
@@ -24,13 +28,12 @@ class GameGrid extends StatefulWidget {
 }
 
 class _GameGridState extends State<GameGrid> {
-  final int rows = 50;
+  final int rows = 70;
   final int columns = 25;
   final double cellSize = 15.0;
   int selectedGrid = -1;
   List<WiFiAccessPoint> accessPoints = <WiFiAccessPoint>[];
-  String selectedSSID = "";
-  int selectedSignal = 0;
+
 
   void kShowSnackBar(BuildContext context, String message) {
     if (kDebugMode) print(message);
@@ -72,7 +75,8 @@ class _GameGridState extends State<GameGrid> {
         "location": selectedGrid,
         "access_points": {
           for (int i = 0; i < amritaConnectAccessPoints.length; i++)
-            '${amritaConnectAccessPoints[i].ssid} ${amritaConnectAccessPoints[i].bssid}': amritaConnectAccessPoints[i].level,
+            '${amritaConnectAccessPoints[i].ssid} ${amritaConnectAccessPoints[i].bssid}':
+                amritaConnectAccessPoints[i].level,
         }
       };
 
@@ -81,7 +85,7 @@ class _GameGridState extends State<GameGrid> {
     }
   }
 
-  void showPopup(Map<String, Object>  data) {
+  void showPopup(Map<String, Object> data) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -89,6 +93,18 @@ class _GameGridState extends State<GameGrid> {
           title: Text("WiFi Information"),
           content: Text("Wifi data: \n$data"),
           actions: [
+            TextButton(
+              onPressed: () async {
+                final response = await learnLocation();
+                if (response.statusCode == 200) {
+                  Navigator.of(context).pop();
+                } else {
+                  print("Error: ${response.statusCode}");
+                  kShowSnackBar(context, "Failed to learn location");
+                }
+              },
+              child: Text("Learn"),
+            ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -101,82 +117,272 @@ class _GameGridState extends State<GameGrid> {
     );
   }
 
+  void _toggleSelectedGrid(int gridNumber) {
+    setState(() {
+      if (selectedTiles.contains(gridNumber)) {
+        selectedTiles.remove(gridNumber);
+      } else {
+        selectedTiles.add(gridNumber);
+      }
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Color.fromRGBO(28, 30, 45, 1),
+    ));
     return Scaffold(
-      body: Stack(
-        children: [
-          InteractiveViewer(
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/images/hostel.png"),
-                  fit: BoxFit.fill,
+      backgroundColor: Color.fromRGBO(28, 30, 45, 1),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(80),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color.fromRGBO(28, 30, 45, 1),
+            border: Border.all(color: Color.fromRGBO(28, 30, 45, 1), width: 0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 30, right: 30, top: 20),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                    ),
+                    Icon(
+                      Icons.fullscreen,
+                      color: Colors.white,
+                    )
+                  ],
                 ),
-              ),
-              child: Column(
-                children: List.generate(
-                  rows,
-                      (row) => Expanded(
-                    child: Row(
+                SizedBox(
+                  height: 15,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Floor Plan",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                        Text(
+                          "1st floor",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        )
+                      ],
+                    ),
+                    Switch(value: false, onChanged: (value) => {null})
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        padding: EdgeInsets.only(top: 30,),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      Colors.black,
+                      Colors.black,
+                      Colors.transparent
+                    ],
+                    stops: [0.0, 0.09, 0.5, 1.0],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: InteractiveViewer(
+                  constrained: false,
+                  boundaryMargin: EdgeInsets.all(100),
+                  child: Container(
+                    height: 1000,
+                    width: 380,
+                    decoration: BoxDecoration(
+                      color: Color.fromRGBO(28, 30, 45, 1),
+                      image: DecorationImage(
+                        image: AssetImage("assets/images/hostel2.png"),
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    child: Column(
                       children: List.generate(
-                        columns,
-                            (col) {
-                          final gridNumber = row * columns + col;
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                if (selectedGrid != gridNumber) {
-                                  selectedGrid = gridNumber;
-                                } else {
-                                  // If the same grid is tapped again, deselect it.
-                                  selectedGrid = -1;
-                                }
-                              });
-                            },
-                            child: GridTile(
-                              child: Container(
-                                width: cellSize,
-                                height: cellSize,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.grey,
-                                    width: 0.1,
+                        rows,
+                        (row) => Expanded(
+                          child: Row(
+                            children: List.generate(
+                              columns,
+                              (col) {
+                                final gridNumber = row * columns + col;
+                                return GestureDetector(
+                                  onTap: () async {
+                                    if (deleteMode) {
+                                      _toggleSelectedGrid(gridNumber);
+                                    } else {
+                                      setState(() {
+                                        if (selectedGrid != gridNumber) {
+                                          selectedGrid = gridNumber;
+                                        } else {
+                                          selectedGrid = -1;
+                                        }
+                                      });
+
+                                      await _updateTilesList();
+                                    }
+                                  },
+                                  child: GridTile(
+                                    child: Container(
+                                      width: cellSize,
+                                      height: cellSize,
+                                      decoration: BoxDecoration(
+                                        border: deleteMode ?  Border.all(width: 0): null,
+                                        color: deleteMode && selectedTiles.contains(gridNumber)
+                                            ? Colors.green
+                                            : null,
+                                      ),
+                                      child: Center(
+                                        child: selectedGrid == gridNumber
+                                            ? Icon(
+                                                Icons.location_on,
+                                                size: 12,
+                                                color: Colors.white,
+                                              )
+                                            : Text(""),
+                                      ),
+                                    ),
                                   ),
-                                  color: selectedGrid == gridNumber
-                                      ? Colors.green
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Text("."),
-                                ),
-                              ),
+                                );
+                              },
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: FloatingActionButton(
-                backgroundColor: Colors.brown,
-                onPressed: () {
-                  _startScan(context);
-                  _getScannedResults(context);
-                },
-                child: Icon(Icons.wifi),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 70,
+                decoration: BoxDecoration(
+                  color: Color.fromRGBO(17, 18, 28, 1),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(35),
+                      topRight: Radius.circular(35)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 30, right: 35, top: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Selected Grid:",
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          Text(
+                            selectedGrid.toString(),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w200,
+                                fontSize: 20,
+                                color: Colors.white),
+                          )
+                        ],
+                      ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            deleteMode = !deleteMode;
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: deleteMode? Colors.lightGreen: Color.fromRGBO(28, 30, 45, 1),
+                            borderRadius: BorderRadius.all(Radius.circular(50)),
+                          ),
+                          child: Icon(Icons.delete, color: Colors.white,),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
+                        child: InkWell(
+                          onTap: () async {
+                            if (deleteMode) {
+                              await _updateTilesList();
+                            } else {
+                              _startScan(context);
+                              _getScannedResults(context);
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.only(
+                                left: 15, right: 15, top: 10, bottom: 10),
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              color: Color.fromRGBO(28, 30, 45, 1),
+                            ),
+                            child: Text(
+                              "Learn",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
 }
+
+// Align(
+// alignment: Alignment.bottomCenter,
+// child: Padding(
+// padding: const EdgeInsets.only(bottom: 16.0),
+// child: FloatingActionButton(
+// backgroundColor: Colors.brown,
+// onPressed: () {
+// _startScan(context);
+// _getScannedResults(context);
+// },
+// child: Icon(Icons.wifi),
+// ),
+// ),
+// ),
