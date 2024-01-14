@@ -113,6 +113,30 @@ class _GameGridState extends State<GameGrid> {
     }
   }
 
+  Future<http.Response> learnLocation() {
+    const points = ['Priya 2', 'Galaxy M218670', 'Galaxy M31E1CB' ];
+
+    // Filter the access points based on SSID
+    Map<String, int> filteredAccessPoints = {};
+    for (int i = 0; i < accessPoints.length; i++) {
+      String ssidBssidKey = '${accessPoints[i].ssid} ${accessPoints[i].bssid}';
+      if (points.contains(accessPoints[i].ssid)) {
+        filteredAccessPoints[ssidBssidKey] = accessPoints[i].level;
+      }
+    }
+
+    return http.post(
+      Uri.parse('http://192.168.1.46:8000/api/learn'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        "location": selectedGrid.toString(),
+        "access_points": filteredAccessPoints,
+      }),
+    );
+  }
+
   void showPopup(Map<String, Object> data) {
     showDialog(
       context: context,
