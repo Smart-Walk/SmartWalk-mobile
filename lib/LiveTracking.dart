@@ -92,6 +92,40 @@ class _GameGridState extends State<GameGrid> with TickerProviderStateMixin{
   }
 
 
+  Future<http.Response> predictLocation(Map<String, Object> data) {
+    return http.post(
+      Uri.parse('http://192.168.1.46:8000/api/predict'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(data),
+    );
+  }
+
+  Future<List<int>> _fetchBlockedTiles() async {
+    final url = Uri.parse('http://192.168.1.46:8000/api/get_blocked');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        final List<dynamic> blockedTilesData = responseData['data']['tiles'];
+
+        final blockedTiles = List<int>.from(blockedTilesData);
+
+        return blockedTiles;
+      } else {
+        print("Error: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      // Handle exceptions
+      print("Exception: $e");
+      return [];
+    }
+  }
+
 
   @override
   void dispose() {
