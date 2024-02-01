@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:wifi_scan/wifi_scan.dart';
 
+import 'RecordLocation.dart';
+
 class LiveTrack extends StatelessWidget {
   const LiveTrack({super.key});
 
@@ -362,9 +364,17 @@ class _GameGridState extends State<GameGrid> with TickerProviderStateMixin{
                       Icons.arrow_back_ios,
                       color: Colors.white,
                     ),
-                    Icon(
-                      Icons.fullscreen,
-                      color: Colors.white,
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => RecordLocation()),
+                        );
+                      },
+                      child: Icon(
+                        Icons.fullscreen,
+                        color: Colors.white,
+                      ),
                     )
                   ],
                 ),
@@ -380,7 +390,7 @@ class _GameGridState extends State<GameGrid> with TickerProviderStateMixin{
                         Text(
                           "Floor Plan",
                           style: TextStyle(
-                            fontSize: 25,
+                            fontSize: 20,
                             color: Colors.white,
                             fontWeight: FontWeight.w300,
                           ),
@@ -388,7 +398,7 @@ class _GameGridState extends State<GameGrid> with TickerProviderStateMixin{
                         Text(
                           "1st floor",
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             color: Colors.grey,
                             fontWeight: FontWeight.w300,
                           ),
@@ -434,7 +444,7 @@ class _GameGridState extends State<GameGrid> with TickerProviderStateMixin{
                       color: Color.fromRGBO(28, 30, 45, 1),
                       image: DecorationImage(
                         image: AssetImage("assets/images/hostel2.png"),
-                        fit: BoxFit.contain,
+                        fit: BoxFit.fill,
                       ),
                     ),
                     child: Column(

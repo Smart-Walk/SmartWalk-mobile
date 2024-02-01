@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:wifi_scan/wifi_scan.dart';
 
+import 'LiveTracking.dart';
+
 class RecordLocation extends StatelessWidget {
   const RecordLocation({super.key});
 
@@ -43,7 +45,6 @@ class _GameGridState extends State<GameGrid> {
     super.initState();
   }
 
-
   Future<void> _updateTilesList() async {
     if (deleteMode) {
       final response = await http.post(
@@ -61,7 +62,6 @@ class _GameGridState extends State<GameGrid> {
       }
     }
   }
-
 
   void kShowSnackBar(BuildContext context, String message) {
     if (kDebugMode) print(message);
@@ -114,7 +114,7 @@ class _GameGridState extends State<GameGrid> {
   }
 
   Future<http.Response> learnLocation() {
-    const points = ['Priya 2', 'Galaxy M218670', 'Galaxy M31E1CB' ];
+    const points = ['Priya 2', 'Galaxy M218670', 'Galaxy M31E1CB'];
 
     // Filter the access points based on SSID
     Map<String, int> filteredAccessPoints = {};
@@ -179,7 +179,6 @@ class _GameGridState extends State<GameGrid> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -205,9 +204,17 @@ class _GameGridState extends State<GameGrid> {
                       Icons.arrow_back_ios,
                       color: Colors.white,
                     ),
-                    Icon(
-                      Icons.fullscreen,
-                      color: Colors.white,
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => LiveTrack()),
+                        );
+                      },
+                      child: Icon(
+                        Icons.fullscreen,
+                        color: Colors.white,
+                      ),
                     )
                   ],
                 ),
@@ -247,7 +254,9 @@ class _GameGridState extends State<GameGrid> {
         ),
       ),
       body: Container(
-        padding: EdgeInsets.only(top: 30,),
+        padding: EdgeInsets.only(
+          top: 30,
+        ),
         child: Stack(
           children: [
             Positioned.fill(
@@ -309,8 +318,12 @@ class _GameGridState extends State<GameGrid> {
                                       width: cellSize,
                                       height: cellSize,
                                       decoration: BoxDecoration(
-                                        border: deleteMode ?  Border.all(width: 0): null,
-                                        color: deleteMode && selectedTiles.contains(gridNumber)
+                                        border: deleteMode
+                                            ? Border.all(width: 0)
+                                            : null,
+                                        color: deleteMode &&
+                                                selectedTiles
+                                                    .contains(gridNumber)
                                             ? Colors.green
                                             : null,
                                       ),
@@ -376,10 +389,15 @@ class _GameGridState extends State<GameGrid> {
                         child: Container(
                           padding: EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: deleteMode? Colors.lightGreen: Color.fromRGBO(28, 30, 45, 1),
+                            color: deleteMode
+                                ? Colors.lightGreen
+                                : Color.fromRGBO(28, 30, 45, 1),
                             borderRadius: BorderRadius.all(Radius.circular(50)),
                           ),
-                          child: Icon(Icons.delete, color: Colors.white,),
+                          child: Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       Padding(
