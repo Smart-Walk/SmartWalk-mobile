@@ -120,13 +120,15 @@ class _GameGridState extends State<GameGrid> {
     Map<String, int> filteredAccessPoints = {};
     for (int i = 0; i < accessPoints.length; i++) {
       String ssidBssidKey = '${accessPoints[i].ssid} ${accessPoints[i].bssid}';
-      if (points.contains(accessPoints[i].ssid)) {
-        filteredAccessPoints[ssidBssidKey] = accessPoints[i].level;
-      }
+      // if (points.contains(accessPoints[i].ssid)) {
+      //   filteredAccessPoints[ssidBssidKey] = accessPoints[i].level;
+      // }
+
+      filteredAccessPoints[ssidBssidKey] = accessPoints[i].level;
     }
 
     return http.post(
-      Uri.parse('http://192.168.1.46:8000/api/learn'),
+      Uri.parse('http://192.168.24.94:8000/api/learn'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

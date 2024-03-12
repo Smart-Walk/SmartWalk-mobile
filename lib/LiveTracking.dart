@@ -77,7 +77,11 @@ class _GameGridState extends State<GameGrid> with TickerProviderStateMixin{
           if (response.statusCode == 200) {
             final jsonResponse = jsonDecode(response.body);
             print(jsonResponse);
-            final newSelectedGrid = int.parse(jsonResponse['result']);
+            String location = jsonResponse['location'];
+            String numberPart = location.split('/')[1].split('.')[0];
+
+            // Converting the extracted string to an integer
+            final newSelectedGrid = int.parse(numberPart);
             setState(() {
               selectedGrid = newSelectedGrid;
               if (selectedGrid != -1 && initial) {
@@ -96,7 +100,7 @@ class _GameGridState extends State<GameGrid> with TickerProviderStateMixin{
 
   Future<http.Response> predictLocation(Map<String, Object> data) {
     return http.post(
-      Uri.parse('http://192.168.1.46:8000/api/predict'),
+      Uri.parse('http://192.168.24.94:8000/api/predict'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
